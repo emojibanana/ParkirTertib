@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Build produksi via CLI standalone (T-002):
+   ./tailwindcss -i public/assets/css/app.css -o public/assets/css/style.css --minify
+   Selama MVP, layout memuat Tailwind via CDN; file ini disiapkan untuk build final. */

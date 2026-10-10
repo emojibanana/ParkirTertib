@@ -1,0 +1,27 @@
+# ParkirTertib: hardening direktori upload (NFR-005, ARCHITECTURE.md S4).
+# Mencegah eksekusi script bila file berbahaya lolos validasi MIME.
+
+# 1. Matikan auto-index agar isi direktori tidak bisa diintip.
+Options -Indexes
+
+# 2. Tolak akses langsung ke file bereksekusi.
+<FilesMatch "(?i)\.(php|phtml|phar|phpt|php\d*|cgi|pl|py|sh|asp|aspx|jsp)$">
+    Require all denied
+</FilesMatch>
+
+# 3. Lepas handler PHP yang mungkin diwarisi dari konfigurasi induk.
+RemoveHandler .php .phtml .phar
+RemoveType .php .phtml .phar
+
+# 4. Matikan engine PHP di direktori ini (mod_php; diabaikan bila memakai FPM).
+<IfModule php_module>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+# 5. Pastikan MIME gambar yang diizinkan selalu benar.
+AddType image/jpeg .jpg .jpeg
+AddType image/png .png
+AddType image/webp .webp

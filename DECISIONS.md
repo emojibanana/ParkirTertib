@@ -1,0 +1,18 @@
+# Engineering Decisions & Single Source of Truth (DECISIONS.md)
+
+| ID | Decision | Rationale | Status |
+|---|---|---|---|
+| **D-001** | **Backend Framework:** PHP Native (PHP 8.2+) using OOP & PDO | Keeps codebase lightweight, high-performance, and directly aligned with course requirements without framework overhead. | Locked |
+| **D-002** | **Database:** MySQL 8.0 / MariaDB 10.6 | Standard relational database with robust SQL support for aggregation queries. | Locked |
+| **D-003** | **Frontend Stack:** HTML5 + Tailwind CSS (via Tailwind CLI standalone) + Vanilla JavaScript | Allows rapid custom utility-first responsive styling without complex Node JS runtime build dependencies in production. | Locked |
+| **D-004** | **Database Naming Convention:** Singular `snake_case` for table names (`user`, `report`, `report_log`). Field names in `snake_case`. | Standard SQL convention ensuring clarity in raw queries and models. | Locked |
+| **D-005** | **Code & File Naming Conventions:** PSR-4 autoloading with Controllers (`UserController.php`), Models (`Report.php`), Views (`/views/user/index.php`). | Ensures clean separation of concerns using MVC architecture pattern in Native PHP. | Locked |
+| **D-006** | **Authentication Model:** Session-based authentication via native PHP `$_SESSION`. Password storage via `password_hash()` (Bcrypt). | Secure, native, and lightweight for server-rendered PHP application. | Locked |
+| **D-007** | **User Roles:** Exactly two roles: `user` (Mahasiswa/Civitas) and `admin` (Satpam). No campus email/NIM validation required for MVP. | Simplifies scope while meeting core functional domain needs. | Locked |
+| **D-008** | **Environment Variables:** Configured via `.env` parsed by a lightweight custom parser or `vlucas/phpdotenv`. Keys: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`, `APP_ENV`, `UPLOAD_DIR`. | Isolates configuration secrets from codebase. | Locked |
+| **D-009** | **Folder Layout:** Standard root directory structure: <br>`/public` (Document root: `index.php`, compiled CSS, JS, uploaded assets)<br>`/src` (Core classes: Controllers, Models, Middleware, Helpers)<br>`/views` (PHP templates)<br>`/bin` (CLI maintenance scripts)<br>`/uploads` (Media file storage directory) | Enforces security by isolating execution entry point to `/public` only. | Locked |
+| **D-010** | **Rate Limiting:** Maximum 3 active reports (`status IN ('Menunggu', 'Diproses', 'Ditindaklanjuti')`) per user account. | Prevents spamming and system overload. | Locked |
+| **D-011** | **Media Auto-Cleanup Policy:** Photos associated with reports having `status = 'Selesai'` updated > 7 days ago are unlinked from local disk storage via `bin/cleanup_photos.php`. | Prevents local disk exhaustion while maintaining text audit trails. | Locked |
+| **D-012** | **License Plate Sanitization:** License plate strings normalized on input: uppercase conversion and space removal (e.g., `BK 1234 AB` -> `BK1234AB`). | Guarantees accurate data matching for repeat offender tracking. | Locked |
+| **D-013** | **MVP Scope Boundaries:** Included FR-001 through FR-007. Excluded capacity monitoring, IoT integration, and payment gateways. | Focuses strictly on participatory reporting and enforcement. | Locked |
+| **D-014** | **Model Class Naming:** `*Model` suffix with matching PSR-4 filenames (`UserModel.php`, `ReportModel.php`, `ReportLogModel.php`). | TASKS.md class references use `*Model`; PSR-4 (D-005) requires filename = classname. Resolves T-004 file/class mismatch. | Locked |

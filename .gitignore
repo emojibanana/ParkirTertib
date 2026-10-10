@@ -1,0 +1,13 @@
+# Dependencies
+vendor/
+
+# Environment secrets (lihat .env.example)
+.env
+
+# Build tool binary (unduh: tailwindcss v3.4.17 windows-x64 dari GitHub releases)
+tailwindcss.exe
+
+# Test artifacts
+tests/tmp/
+coverage/
+.phpunit.result.cache
