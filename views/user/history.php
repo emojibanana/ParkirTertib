@@ -21,7 +21,7 @@ $reports = isset($reports) && is_array($reports) ? $reports : [];
     <?php else: ?>
         <div class="mt-4 space-y-3">
             <?php foreach ($reports as $report): ?>
-                <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <article class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-report-id="<?= (int) $report['id'] ?>">
                     <div class="flex gap-3">
                         <?php if (!empty($report['photo_url'])): ?>
                             <img src="<?= Sanitizer::escape((string) $report['photo_url']) ?>" alt="Foto bukti"
@@ -33,7 +33,7 @@ $reports = isset($reports) && is_array($reports) ? $reports : [];
                             <p class="font-mono font-bold text-slate-900"><?= Sanitizer::escape((string) $report['license_plate']) ?></p>
                             <p class="mt-0.5 text-xs text-slate-500"><?= Sanitizer::escape((string) $report['category']) ?> &middot; <?= Sanitizer::escape((string) $report['location']) ?></p>
                             <p class="mt-1">
-                                <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium <?= Sanitizer::escape((string) $report['badge']) ?>"><?= Sanitizer::escape((string) $report['status']) ?></span>
+                                <span data-role="status-badge" class="inline-block rounded-full px-2 py-0.5 text-xs font-medium <?= Sanitizer::escape((string) $report['badge']) ?>"><?= Sanitizer::escape((string) $report['status']) ?></span>
                             </p>
                             <p class="mt-1 text-xs text-slate-500"><?= Sanitizer::escape((string) $report['date_label']) ?></p>
                         </div>
@@ -52,3 +52,34 @@ $reports = isset($reports) && is_array($reports) ? $reports : [];
         </div>
     <?php endif; ?>
 </div>
+<script src="/assets/js/app.js"></script>
+<script>
+(function () {
+  if (!window.ParkirTertib) return;
+  var BADGES = {
+    'Menunggu': 'bg-amber-100 text-amber-800',
+    'Diproses': 'bg-sky-100 text-sky-800',
+    'Ditindaklanjuti': 'bg-indigo-100 text-indigo-800',
+    'Selesai': 'bg-emerald-100 text-emerald-800'
+  };
+  var snapshot = null;
+  window.ParkirTertib.poll('/api/notifications', function (data) {
+    var current = {};
+    (data.reports || []).forEach(function (r) { current[r.id] = r.status; });
+    if (snapshot) {
+      Object.keys(current).forEach(function (id) {
+        if (snapshot[id] && snapshot[id] !== current[id]) {
+          window.ParkirTertib.toast('Laporan #' + id + ': ' + snapshot[id] + ' menjadi ' + current[id], 'info');
+          window.ParkirTertib.beep();
+          var badge = document.querySelector('[data-report-id="' + id + '"] [data-role="status-badge"]');
+          if (badge) {
+            badge.textContent = current[id];
+            badge.className = 'inline-block rounded-full px-2 py-0.5 text-xs font-medium ' + (BADGES[current[id]] || '');
+          }
+        }
+      });
+    }
+    snapshot = current;
+  }, 15000);
+})();
+</script>

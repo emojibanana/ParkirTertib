@@ -25,19 +25,19 @@ $allStatuses = isset($allStatuses) && is_array($allStatuses) ? $allStatuses : []
         <div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                 <p class="text-xs text-slate-500">Total Laporan</p>
-                <p class="text-2xl font-bold text-slate-900"><?= (int) ($counts['total'] ?? 0) ?></p>
+                <p id="kpi-total" class="text-2xl font-bold text-slate-900"><?= (int) ($counts['total'] ?? 0) ?></p>
             </div>
             <div class="rounded-xl border border-slate-200 border-l-4 border-l-amber-500 bg-white p-4 shadow-sm">
                 <p class="text-xs text-slate-500">Menunggu</p>
-                <p class="text-2xl font-bold text-slate-900"><?= (int) ($counts['menunggu'] ?? 0) ?></p>
+                <p id="kpi-menunggu" class="text-2xl font-bold text-slate-900"><?= (int) ($counts['menunggu'] ?? 0) ?></p>
             </div>
             <div class="rounded-xl border border-slate-200 border-l-4 border-l-sky-500 bg-white p-4 shadow-sm">
                 <p class="text-xs text-slate-500">Diproses</p>
-                <p class="text-2xl font-bold text-slate-900"><?= (int) ($counts['diproses'] ?? 0) ?></p>
+                <p id="kpi-diproses" class="text-2xl font-bold text-slate-900"><?= (int) ($counts['diproses'] ?? 0) ?></p>
             </div>
             <div class="rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 bg-white p-4 shadow-sm">
                 <p class="text-xs text-slate-500">Selesai</p>
-                <p class="text-2xl font-bold text-slate-900"><?= (int) ($counts['selesai'] ?? 0) ?></p>
+                <p id="kpi-selesai" class="text-2xl font-bold text-slate-900"><?= (int) ($counts['selesai'] ?? 0) ?></p>
             </div>
         </div>
 
@@ -97,5 +97,40 @@ $allStatuses = isset($allStatuses) && is_array($allStatuses) ? $allStatuses : []
                 </tbody>
             </table>
         </div>
+        <div id="new-report-banner" class="hidden mt-4 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 px-4 py-3 text-sm" role="alert">
+            Ada laporan baru masuk. <button type="button" onclick="location.reload()" class="font-medium underline">Muat ulang daftar</button>
+        </div>
     </section>
 </div>
+<script src="/assets/js/app.js"></script>
+<script>
+(function () {
+  if (!window.ParkirTertib) return;
+  var seen = null;
+  function setKpi(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+  window.ParkirTertib.poll('/api/admin/updates', function (data) {
+    if (data.counts) {
+      setKpi('kpi-total', data.counts.total || 0);
+      setKpi('kpi-menunggu', data.counts.menunggu || 0);
+      setKpi('kpi-diproses', data.counts.diproses || 0);
+      setKpi('kpi-selesai', data.counts.selesai || 0);
+    }
+    var ids = {};
+    (data.reports || []).forEach(function (r) { ids[r.id] = r; });
+    if (seen) {
+      Object.keys(ids).forEach(function (id) {
+        if (!seen[id]) {
+          window.ParkirTertib.toast('Laporan baru #' + id + ' (' + ids[id].license_plate + ')', 'info');
+          window.ParkirTertib.beep();
+          var banner = document.getElementById('new-report-banner');
+          if (banner) banner.classList.remove('hidden');
+        }
+      });
+    }
+    seen = ids;
+  }, 15000);
+})();
+</script>

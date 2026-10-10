@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Zona waktu aplikasi: WIB (D-015).
+date_default_timezone_set('Asia/Jakarta');
+
 /**
  * Front Controller (ADR-01) - satu-satunya entry point HTTP.
  * Semua request non-file dirutekan ke sini via public/.htaccess.
@@ -25,6 +28,7 @@ require_once dirname(__DIR__) . '/config/database.php';
 use App\Controllers\AuthController;
 use App\Controllers\ReportController;
 use App\Controllers\AdminController;
+use App\Controllers\NotificationController;
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\AdminMiddleware;
 
@@ -135,6 +139,23 @@ if ($uri === '/admin/repeat-offenders' && $method === 'GET') {
     $search = isset($_GET['search']) && is_string($_GET['search']) ? $_GET['search'] : null;
     header('Content-Type: text/html; charset=utf-8');
     echo $admin->repeatOffenders($search);
+    exit;
+}
+
+if ($uri === '/api/notifications' && $method === 'GET') {
+    AuthMiddleware::handle();
+    $api = new NotificationController(createPDOConnection());
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($api->userUpdates((int) $_SESSION['user_id']), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($uri === '/api/admin/updates' && $method === 'GET') {
+    AuthMiddleware::handle();
+    AdminMiddleware::handle();
+    $api = new NotificationController(createPDOConnection());
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($api->adminUpdates(), JSON_UNESCAPED_UNICODE);
     exit;
 }
 

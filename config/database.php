@@ -10,6 +10,7 @@ require_once __DIR__ . '/env.php';
  * - ERRMODE_EXCEPTION untuk error handling eksplisit.
  * - FETCH_ASSOC sebagai fetch mode default.
  * - utf8mb4 untuk dukungan karakter penuh.
+ * - Sesi MySQL diset ke WIB agar kolom TIMESTAMP terbaca sebagai waktu lokal (D-015).
  */
 function createPDOConnection(): PDO
 {
@@ -34,6 +35,7 @@ function createPDOConnection(): PDO
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
+    $pdo->exec("SET time_zone = '+07:00'");
 
     return $pdo;
 }
