@@ -117,8 +117,9 @@ to `public/assets/css/style.css`. No CDN at runtime.
     * Action button: "Lihat Semua Laporan Motor Ini".
 
 ### 2.8 Real-Time Behaviors (FR-008)
-* **Toast Component:** Fixed bottom-right stack (`#toast-container`), auto-dismiss 8s,
-  types success/error/info, text injected via `textContent` (XSS-safe), optional beep.
+* **Toast Component:** Fixed top-center stack (`#toast-container`, area fokus mata),
+  slide-down + auto-dismiss 9 detik + tombol tutup, aksen kiri per tipe, teks via
+  `textContent` (XSS-safe), lonceng arpeggio lembut opsional.
 * **User History:** Polls `/api/notifications` every 15s; on status change shows toast
   (`Laporan #ID: Lama menjadi Baru`), beeps, and updates the card badge in place.
 * **Admin Dashboard:** Polls `/api/admin/updates` every 15s; on new report shows toast
