@@ -102,35 +102,3 @@ $allStatuses = isset($allStatuses) && is_array($allStatuses) ? $allStatuses : []
         </div>
     </section>
 </div>
-<script src="/assets/js/app.js"></script>
-<script>
-(function () {
-  if (!window.ParkirTertib) return;
-  var seen = null;
-  function setKpi(id, value) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = value;
-  }
-  window.ParkirTertib.poll('/api/admin/updates', function (data) {
-    if (data.counts) {
-      setKpi('kpi-total', data.counts.total || 0);
-      setKpi('kpi-menunggu', data.counts.menunggu || 0);
-      setKpi('kpi-diproses', data.counts.diproses || 0);
-      setKpi('kpi-selesai', data.counts.selesai || 0);
-    }
-    var ids = {};
-    (data.reports || []).forEach(function (r) { ids[r.id] = r; });
-    if (seen) {
-      Object.keys(ids).forEach(function (id) {
-        if (!seen[id]) {
-          window.ParkirTertib.toast('Laporan baru #' + id + ' (' + ids[id].license_plate + ')', 'info');
-          window.ParkirTertib.beep();
-          var banner = document.getElementById('new-report-banner');
-          if (banner) banner.classList.remove('hidden');
-        }
-      });
-    }
-    seen = ids;
-  }, 5000);
-})();
-</script>

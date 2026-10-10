@@ -117,6 +117,8 @@ to `public/assets/css/style.css`. No CDN at runtime.
     * Action button: "Lihat Semua Laporan Motor Ini".
 
 ### 2.8 Real-Time Behaviors (FR-008)
+* Polling hidup di **semua halaman** via footer bersama (hanya untuk user login;
+  tamu tidak polling). Interval 5 detik, pause saat tab hidden.
 * **Toast Component:** Fixed top-center stack (`#toast-container`, area fokus mata),
   slide-down + auto-dismiss 9 detik + tombol tutup, aksen kiri per tipe, teks via
   `textContent` (XSS-safe), lonceng arpeggio lembut opsional.

@@ -52,34 +52,4 @@ $reports = isset($reports) && is_array($reports) ? $reports : [];
         </div>
     <?php endif; ?>
 </div>
-<script src="/assets/js/app.js"></script>
-<script>
-(function () {
-  if (!window.ParkirTertib) return;
-  var BADGES = {
-    'Menunggu': 'bg-amber-100 text-amber-800',
-    'Diproses': 'bg-sky-100 text-sky-800',
-    'Ditindaklanjuti': 'bg-indigo-100 text-indigo-800',
-    'Selesai': 'bg-emerald-100 text-emerald-800'
-  };
-  var snapshot = null;
-  window.ParkirTertib.poll('/api/notifications', function (data) {
-    var current = {};
-    (data.reports || []).forEach(function (r) { current[r.id] = r.status; });
-    if (snapshot) {
-      Object.keys(current).forEach(function (id) {
-        if (snapshot[id] && snapshot[id] !== current[id]) {
-          window.ParkirTertib.toast('Laporan #' + id + ': ' + snapshot[id] + ' menjadi ' + current[id], 'info');
-          window.ParkirTertib.beep();
-          var badge = document.querySelector('[data-report-id="' + id + '"] [data-role="status-badge"]');
-          if (badge) {
-            badge.textContent = current[id];
-            badge.className = 'inline-block rounded-full px-2 py-0.5 text-xs font-medium ' + (BADGES[current[id]] || '');
-          }
-        }
-      });
-    }
-    snapshot = current;
-  }, 5000);
-})();
-</script>
+

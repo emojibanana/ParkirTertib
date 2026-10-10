@@ -14,7 +14,7 @@ window.ParkirTertib = (function () {
     return box;
   }
 
-  function toast(message, type) {
+  function toast(message, type, title) {
     var accents = {
       success: 'border-emerald-500 bg-emerald-50 text-emerald-900',
       error: 'border-rose-500 bg-rose-50 text-rose-900',
@@ -31,9 +31,17 @@ window.ParkirTertib = (function () {
     var mark = document.createElement('span');
     mark.className = 'mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white';
     mark.textContent = marks[type] || marks.info;
+    var body = document.createElement('span');
+    body.className = 'flex-1 leading-relaxed';
+    if (title) {
+      var heading = document.createElement('span');
+      heading.className = 'block font-bold';
+      heading.textContent = title;
+      body.appendChild(heading);
+    }
     var text = document.createElement('span');
-    text.className = 'flex-1 leading-relaxed';
     text.textContent = message;
+    body.appendChild(text);
     var close = document.createElement('button');
     close.type = 'button';
     close.setAttribute('aria-label', 'Tutup notifikasi');
@@ -41,7 +49,7 @@ window.ParkirTertib = (function () {
     close.textContent = '×';
     close.addEventListener('click', function () { el.remove(); });
     el.appendChild(mark);
-    el.appendChild(text);
+    el.appendChild(body);
     el.appendChild(close);
     ensureContainer().appendChild(el);
     window.requestAnimationFrame(function () {
