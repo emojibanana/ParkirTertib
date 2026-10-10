@@ -11,6 +11,10 @@ $flashStyles = [
     'error' => 'bg-rose-50 text-rose-800 border border-rose-200',
     'warning' => 'bg-amber-50 text-amber-800 border border-amber-200',
 ];
+
+$cssPath = dirname(__DIR__, 2) . '/public/assets/css/style.css';
+$cssMtime = filemtime($cssPath);
+$cssVer = $cssMtime === false ? 1 : (int) $cssMtime;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -18,7 +22,7 @@ $flashStyles = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=<?= $cssVer ?>">
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
 <header class="bg-emerald-700 text-white shadow">

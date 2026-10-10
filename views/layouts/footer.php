@@ -9,7 +9,12 @@ document.getElementById('nav-toggle')?.addEventListener('click', function () {
   document.getElementById('nav-drawer')?.classList.toggle('hidden');
 });
 </script>
-<script src="/assets/js/app.js"></script>
+<?php
+$appJsPath = dirname(__DIR__, 2) . '/public/assets/js/app.js';
+$appJsMtime = filemtime($appJsPath);
+$appJsVer = $appJsMtime === false ? 1 : (int) $appJsMtime;
+?>
+<script src="/assets/js/app.js?v=<?= $appJsVer ?>"></script>
 <?php $pollRole = $_SESSION['user_role'] ?? null; ?>
 <?php if ($pollRole === 'user' || $pollRole === 'admin'): ?>
 <script>
