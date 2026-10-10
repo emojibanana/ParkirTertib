@@ -2,7 +2,8 @@
 
 ## 1. Design Tokens & Styling Architecture
 
-The application uses Tailwind CSS v3 utility classes compiled via Tailwind CLI standalone executable.
+The application uses Tailwind CSS v3 (CLI standalone v3.4.17) utility classes compiled
+to `public/assets/css/style.css`. No CDN at runtime.
 
 ### 1.1 Color Palette
 * **Primary (Brand / Unimed Green):** `emerald-700` (`#047857`), hover `emerald-800` (`#065f46`), light background `emerald-50` (`#ecfdf5`).
@@ -91,6 +92,8 @@ The application uses Tailwind CSS v3 utility classes compiled via Tailwind CLI s
   * **Responsive Data Table:**
     * Columns: ID, Tanggal, Pelat Nomor, Lokasi, Kategori, Status, Aksi.
     * Action button: "Tindak Lanjut" links to `/admin/report/detail?id={id}`.
+  * **Maintenance Card:** POST form to `/admin/cleanup-photos` with CSRF token, confirm dialog,
+    and button "Bersihkan Foto Lama" (FR-009). Result shown via flash summary.
 
 ### 2.6 Screen: Satpam Report Detail & Action (`/views/admin/detail.php`)
 * **Target Layout:** Two-column split layout (`lg:grid lg:grid-cols-2 gap-8`).
@@ -112,6 +115,15 @@ The application uses Tailwind CSS v3 utility classes compiled via Tailwind CLI s
     * Lokasi Sering Melanggar.
     * Tanggal Terakhir Pelanggaran.
     * Action button: "Lihat Semua Laporan Motor Ini".
+
+### 2.8 Real-Time Behaviors (FR-008)
+* **Toast Component:** Fixed bottom-right stack (`#toast-container`), auto-dismiss 8s,
+  types success/error/info, text injected via `textContent` (XSS-safe), optional beep.
+* **User History:** Polls `/api/notifications` every 15s; on status change shows toast
+  (`Laporan #ID: Lama menjadi Baru`), beeps, and updates the card badge in place.
+* **Admin Dashboard:** Polls `/api/admin/updates` every 15s; on new report shows toast
+  (`Laporan baru #ID (pelat)`), beeps, updates KPI numbers live, and reveals a reload banner.
+* Polling pauses when the tab is hidden (`document.hidden`).
 
 ---
 

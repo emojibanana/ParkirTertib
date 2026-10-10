@@ -5,9 +5,10 @@
 To ensure high reliability, security, and maintainability for **ParkirTertib**, automated testing covers core business logic, authentication, input validation, file uploads, and data access.
 
 * **Target Code Coverage:** `>= 80%` code coverage across core application components (`/src/Controllers`, `/src/Models`, `/src/Helpers`, `/src/Middlewares`).
-* **Test Suite Framework:** PHPUnit 10+ (`phpunit/phpunit`).
-* **Static Analysis:** PHPStan Level 5 (`phpstan/phpstan`).
-* **Code Style Enforcement:** PHP_CodeSniffer with PSR-12 standard (`squizlabs/php_codesniffer`).
+* **Test Suite Framework:** PHPUnit 12.5 (`phpunit/phpunit`).
+* **Static Analysis:** PHPStan 2.x (`phpstan/phpstan`).
+* **Code Style Enforcement:** PHP_CodeSniffer 4.0 with PSR-12 standard (`squizlabs/php_codesniffer`).
+* **Current Suite (Okt 2026):** 57 tests, 183 assertions, all green.
 
 ---
 
@@ -15,10 +16,9 @@ To ensure high reliability, security, and maintainability for **ParkirTertib**, 
 
 ### 2.1 Unit Tests (`tests/Unit/`)
 Focuses on isolated testing of individual helper functions, models, and sanitizers without requiring HTTP or live network calls.
-* **CSRF Helper Test (`CSRFTest.php`):** Verifies token generation, verification using `hash_equals()`, and session destruction behavior.
-* **Sanitizer Test (`SanitizerTest.php`):** Verifies HTML escaping, string trimming, and license plate normalization (e.g. `bk  1234  abc` -> `BK1234ABC`).
+* **Security Test (`SecurityTest.php`):** Verifies CSRF token generation/verification using `hash_equals()`, plus HTML escaping and license plate normalization (e.g. `bk  1234  abc` -> `BK1234ABC`).
 * **File Upload Helper Test (`FileUploadTest.php`):** Verifies MIME type detection via `finfo_file()`, file size limit enforcement (<= 5MB), extension whitelist validation, and randomized filename generation.
-* **Photo Cleanup CLI Test (`CleanupPhotosTest.php`):** Verifies that photo files older than 7 days for resolved reports (`status = 'Selesai'`) are unlinked from local disk while preserving text metadata.
+* **Photo Cleanup Test (`CleanupPhotosTest.php`):** Verifies `PhotoCleaner::run()` unlinks >7-day resolved photos (NULL-ing the column) while preserving recent/active ones, plus the dashboard cleanup action and its CSRF rejection. Runs against the isolated test schema with rollback.
 
 ### 2.2 Integration Tests (`tests/Integration/`)
 Tests interaction between Controllers, Models, PDO database queries, and session state using an isolated SQLite/MySQL test database.
@@ -29,11 +29,17 @@ Tests interaction between Controllers, Models, PDO database queries, and session
 * **Report Submission Rate Limit Test (`ReportSubmissionTest.php`):**
   * Submitting valid report creates database record in `report` table.
   * Submitting a 4th active report when 3 active reports exist raises validation error and rejects insertion.
+* **Report History Test (`ReportHistoryTest.php`):**
+  * History shows own reports with badges, notes, photo thumbnails/fallbacks; hides other users' reports; empty state renders.
+* **Report Model Test (`ReportModelTest.php`):**
+  * Summary counts, filtered search, atomic `updateStatus()` with audit log, repeat-offender aggregation.
 * **Admin Report Management Test (`AdminReportTest.php`):**
   * Satpam updating status creates audit log entry in `report_log`.
   * Status transition enforces allowed states (`Menunggu` -> `Diproses` -> `Ditindaklanjuti` -> `Selesai`).
 * **Repeat Offenders Query Test (`RepeatOffendersTest.php`):**
   * Aggregation query groups violation reports correctly by normalized `license_plate` and sorts descending by total count.
+* **Notification Polling Test (`NotificationTest.php`):**
+  * User endpoint reflects status changes and isolates users; admin endpoint returns counts plus newest-first list.
 
 ### 2.3 Security & Static Analysis Checks
 * **SQL Injection Safety:** Verify that all model methods execute PDO parameterized queries (`$stmt->bindValue()`).

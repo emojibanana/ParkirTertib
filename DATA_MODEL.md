@@ -156,3 +156,14 @@ INSERT INTO `user` (`id`, `name`, `email`, `password`, `role`) VALUES
 (1, 'Satpam Utama', 'satpam@unimed.ac.id', '$2y$10$e8R45VbF.O4V0q0sQkR9U.rN8fP7lU2/k5P3P6B6N.9I9O9P9Q9S.', 'admin'),
 (2, 'Ahmad Student', 'ahmad@mhs.unimed.ac.id', '$2y$10$e8R45VbF.O4V0q0sQkR9U.rN8fP7lU2/k5P3P6B6N.9I9O9P9Q9S.', 'user');
 ```
+
+> **Catatan implementasi:** hash di atas adalah placeholder; `schema.sql` di repo memakai
+> hash bcrypt valid hasil `password_hash('Password123!')`. Tidak ada migrasi pasca-MVP:
+> notifikasi (FR-008) membaca `report.status`/`updated_at` yang ada, cleanup manual (FR-009)
+> memakai `report.photo`, dan waktu tampil dinormalisasi ke WIB di lapisan aplikasi (D-015).
+
+## 4. Post-MVP Notes (No Migration Required)
+
+* **Notifications (FR-008):** derived from the existing `report` table; no new tables or columns.
+* **Manual cleanup (FR-009):** reuses `report.photo`; no schema change.
+* **Timestamps:** stored as server time, rendered WIB-normalized at the application layer (D-015).

@@ -218,3 +218,32 @@
   4. Write unit test mocking file creation and verifying cleanup logic.
 * **Acceptance Criteria:** Running CLI script unlinks photos older than 7 days for resolved reports while leaving recent or pending report photos intact.
 * **Verification Command:** `php bin/cleanup_photos.php` and `vendor/bin/phpunit tests/Unit/CleanupPhotosTest.php`
+
+---
+
+## Milestone 5: Post-MVP Follow-Ups (M5) — COMPLETED
+
+### F-001: Real-Time Notifications via Polling (FR-008, D-016)
+* **Files:** `src/Controllers/NotificationController.php`, `public/assets/js/app.js`,
+  `views/user/history.php`, `views/admin/dashboard.php`, `public/index.php`,
+  `tests/Integration/NotificationTest.php`
+* **Done:** `/api/notifications` + `/api/admin/updates` (15s poll, hidden-tab pause),
+  toast + beep, live badge/KPI updates. Verified by browser + integration tests.
+
+### F-002: Dashboard Cleanup Button (FR-009, D-018)
+* **Files:** `src/Helpers/PhotoCleaner.php`, `bin/cleanup_photos.php`,
+  `src/Controllers/AdminController.php`, `views/admin/dashboard.php`, `public/index.php`
+* **Done:** extracted shared helper for CLI + web; `POST /admin/cleanup-photos`
+  (admin + CSRF) with flash summary. Verified end-to-end in browser.
+
+### F-003: WIB Time Normalization (NFR-010, D-015)
+* **Files:** `public/index.php`, `config/database.php`
+* **Done:** PHP `Asia/Jakarta` + MySQL session `+07:00`; no data migration.
+
+### F-004: Deployment & Release
+* **Done:** Tailwind v3.4.17 build (`style.css`, CDN removed), `public/uploads/.htaccess`
+  hardening (verified 403/200 on Apache), daily Task Scheduler cleanup job,
+  `schema_hosting.sql` + htdocs shim (verified on real Apache), git repo with
+  Conventional Commits, README with demo link.
+
+**Final suite (Okt 2026): 57 tests, 183 assertions — all green. PHPStan level 5 clean. PHPCS PSR-12 clean.**

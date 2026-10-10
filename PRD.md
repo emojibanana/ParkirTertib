@@ -68,6 +68,17 @@ Rapid growth in motor vehicle usage at UNIMED leads to severe parking congestion
 * **Acceptance Criteria:**
   * **Given** a report with status `Selesai` updated 8 days ago and a corresponding image file in `uploads/`, **When** the CLI cleanup script (`bin/cleanup_photos.php`) is executed, **Then** the image file is unlinked from disk, and the report `photo` column reference is cleared/set to NULL or marked deleted, while preserving report text metadata.
 
+### FR-008: Real-Time Notifications (Post-MVP, D-017)
+* **Description:** System shall notify Satpam of incoming reports and notify users of status changes on their reports via lightweight polling (15s) with toast and sound, without new tables or dependencies.
+* **Acceptance Criteria:**
+  * **Given** an authenticated `admin` with the dashboard open, **When** a new report is submitted, **Then** a toast "Laporan baru #ID (pelat)" appears with sound within ~15 seconds and KPI counts update live.
+  * **Given** an authenticated `user` with the history page open, **When** Satpam changes their report status, **Then** a toast shows the transition and the card badge updates without refresh.
+
+### FR-009: Manual Media Cleanup Trigger (Post-MVP, D-017)
+* **Description:** System shall expose the FR-007 cleanup logic as a CSRF-protected dashboard button (`POST /admin/cleanup-photos`) for hosting environments without CLI/cron, reusing the same shared helper.
+* **Acceptance Criteria:**
+  * **Given** an authenticated `admin`, **When** pressing "Bersihkan Foto Lama", **Then** the same >7-day resolved-photo purge runs and a flash summary (checked/deleted/missing/failed) is shown.
+
 ## 7. Non-Functional Requirements (NFR)
 
 * **NFR-001 (OWASP A03: SQL Injection):** All database interactions must use PDO prepared statements with parameter binding. Dynamic string concatenation in SQL queries is strictly prohibited.
@@ -79,6 +90,7 @@ Rapid growth in motor vehicle usage at UNIMED leads to severe parking congestion
 * **NFR-007 (OWASP A01: CSRF Protection):** All state-changing POST forms must include a cryptographically secure CSRF token validated server-side.
 * **NFR-008 (Performance):** Page load response times must be under 2.0 seconds on standard 3G connection conditions.
 * **NFR-009 (Responsiveness):** Public and user pages must be fully responsive down to 320px screen width (Mobile-first layout). Admin interfaces must be optimized for standard desktop viewports (>= 1024px).
+* **NFR-010 (Local Time Display):** All timestamps rendered to users must be in WIB (D-015), regardless of server timezone.
 
 ## 8. User Flows
 
@@ -100,6 +112,12 @@ Rapid growth in motor vehicle usage at UNIMED leads to severe parking congestion
 6. Satpam updates status to `Ditindaklanjuti` and inputs response note: "Stiker teguran telah ditempelkan di lokasi."
 7. Satpam marks report as `Selesai`.
 
+### Flow 3: Real-Time Notification Delivery
+1. User keeps the history page open; browser polls `/api/notifications` every 15 seconds.
+2. Satpam updates the report status on the desktop dashboard.
+3. Within ~15 seconds the user sees a toast with the transition, hears a beep, and the card badge updates without refresh.
+4. Symmetrically, Satpam's open dashboard polls `/api/admin/updates`; a newly submitted report triggers a "Laporan baru" toast and live KPI updates.
+
 ## 9. Edge Cases & Handling
 * **Duplicate License Plate Entry:** Formatting inconsistencies (e.g., `BK 1234 ABC` vs `BK1234ABC`). *Handling:* License plate input strings are sanitized by converting to uppercase and stripping inner spaces during storage to ensure uniform grouping in repeat offender queries.
 * **File Cleanup Execution Failure:** Disk permissions block deletion. *Handling:* CLI cleanup script logs error message to system log without throwing fatal crash, continuing execution for remaining files.
@@ -109,3 +127,5 @@ Rapid growth in motor vehicle usage at UNIMED leads to severe parking congestion
 * **Satpam:** Unimed Campus Security Personnel acting as system Administrators.
 * **Active Report:** Any submitted report that has not yet reached `Selesai` status.
 * **Repeat Offender:** A vehicle identified by license plate that appears in multiple violation reports.
+* **Polling:** Client-side periodic JSON fetching (15s) used for real-time updates where WebSockets are unavailable.
+* **WIB Normalization:** Displaying all times in Western Indonesian Time regardless of server timezone (D-015).

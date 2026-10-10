@@ -24,8 +24,11 @@ Alur coba: daftar akun baru → buat laporan + foto → login satpam → ubah st
 - **Riwayat laporan** mobile-first: badge status, catatan Satpam, tanggal Indonesia.
 - **Dashboard Satpam**: kartu KPI, pencarian pelat/lokasi, filter status, timeline audit.
 - **Pelanggar berulang**: agregasi per pelat, terurut pelanggaran terbanyak.
+- **Notifikasi real-time**: polling ringan — Satpam dapat toast + bunyi saat laporan masuk,
+  user dapat toast + badge live saat status laporannya berubah.
+- **Waktu WIB**: semua timestamp tampil Waktu Indonesia Barat di server mana pun.
 - **Cleanup otomatis**: foto laporan `Selesai` > 7 hari dihapus (tombol dashboard / CLI
-  `php bin/cleanup_photos.php`).
+  `php bin/cleanup_photos.php` / scheduler harian).
 
 ## Tech Stack
 
@@ -62,7 +65,7 @@ Build ulang CSS setelah mengubah view:
 ## Testing & Quality
 
 ```bash
-vendor/bin/phpunit                        # 54 tests, 175 assertions
+vendor/bin/phpunit                        # 57 tests, 183 assertions
 vendor/bin/phpstan analyse src/ --level=5 # static analysis
 vendor/bin/phpcs --standard=PSR12 src/    # code style
 php bin/cleanup_photos.php                # dry-run cleanup foto

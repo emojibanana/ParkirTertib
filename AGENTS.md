@@ -4,10 +4,10 @@
 ParkirTertib is a web-based participatory reporting and monitoring system for motorcycle parking violations at Universitas Negeri Medan (UNIMED). It enables students to report violations via mobile browsers and provides Satpam security officers with a desktop dashboard to enforce rules and track repeat offenders.
 
 ## 2. Tech Stack & Environment
-* **PHP:** 8.2+ (Native OOP & PDO)
+* **PHP:** 8.2+ (Native OOP & PDO; verified with 8.3.30)
 * **Database:** MySQL 8.0 / MariaDB 10.6
-* **Frontend:** HTML5, Vanilla JavaScript (ES6+), Tailwind CSS v3 [VERIFY: latest stable]
-* **Testing & Quality:** PHPUnit 10+ [VERIFY: latest stable], PHPStan Level 5 [VERIFY: latest stable], PHP_CodeSniffer (PSR-12) [VERIFY: latest stable]
+* **Frontend:** HTML5, Vanilla JavaScript (ES6+), Tailwind CSS v3.4.17 (CLI standalone, compiled to `style.css`, no CDN)
+* **Testing & Quality:** PHPUnit 12.5, PHPStan 2.x Level 5, PHPCS 4.0 PSR-12 (57 tests, 183 assertions, Okt 2026)
 
 ## 3. Mandatory Document Execution Order
 Before starting work on any task, agents MUST read project documents in this exact order:
@@ -38,6 +38,9 @@ vendor/bin/phpstan analyse src/ --level=5
 
 # Run PSR-12 code style check
 vendor/bin/phpcs --standard=PSR12 src/
+
+# Run photo cleanup (CLI or dashboard button POST /admin/cleanup-photos)
+php bin/cleanup_photos.php
 ```
 
 ## 5. Coding Standards & Conventions

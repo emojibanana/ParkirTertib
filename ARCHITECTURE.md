@@ -23,12 +23,14 @@ graph TD
             AuthController["AuthController"]
             ReportController["ReportController"]
             AdminController["AdminController"]
+            NotificationController["NotificationController (JSON polling API)"]
         end
 
         subgraph Helpers ["Helpers & Security Components"]
             CSRFHelper["CSRF Token Helper"]
             UploadHelper["File Upload & MIME Sanitizer"]
             ViewHelper["View Renderer & XSS Escaper"]
+            PhotoCleaner["PhotoCleaner (CLI + Web Cleanup)"]
         end
 
         subgraph Models ["Data Access Models"]
@@ -50,6 +52,8 @@ graph TD
 
     MobileUser -->|"HTTP GET/POST"| PublicIndex
     DesktopAdmin -->|"HTTP GET/POST"| PublicIndex
+    MobileUser -->|"Poll /api/notifications (15s)"| PublicIndex
+    DesktopAdmin -->|"Poll /api/admin/updates (15s)"| PublicIndex
     PublicIndex --> StaticAssets
     PublicIndex --> Router
     Router --> AuthMiddleware
@@ -100,10 +104,12 @@ parkir-tertib/
 │   ├── Controllers/
 │   │   ├── AdminController.php  # Handles Satpam dashboard & repeat offenders
 │   │   ├── AuthController.php   # Handles login, registration, logout
+│   │   ├── NotificationController.php  # JSON polling API (FR-008)
 │   │   └── ReportController.php  # Handles report creation and tracking
 │   ├── Helpers/
 │   │   ├── CSRF.php             # Token generation and validation
 │   │   ├── FileUpload.php       # MIME validation, size checking, storage
+│   │   ├── PhotoCleaner.php     # Shared >7-day photo purge (CLI + web)
 │   │   └── Sanitizer.php        # Input escaping and license plate normalization
 │   ├── Middlewares/
 │   │   ├── AdminMiddleware.php  # Restricts access to Satpam roles
@@ -191,3 +197,35 @@ The application reads configuration parameters from `.env` loaded into PHP syste
 * **Context:** Users input license plates with varying spaces/casing (e.g., `bk 1234 abc` vs `BK1234ABC`).
 * **Decision:** `Sanitizer::normalizeLicensePlate()` converts string to uppercase and removes all internal whitespaces before saving.
 * **Consequence:** Aggregation queries for repeat offender tracking run accurately on exact string matches (`BK1234ABC`).
+
+### ADR-03: Polling Instead of WebSockets for Real-Time Updates
+* **Context:** Users expect live notifications, but shared hosting provides no WebSocket server, background worker, or cron.
+* **Decision:** 15-second JSON polling (`/api/notifications`, `/api/admin/updates`) with client-side snapshot diffing, toast, and beep (D-016).
+* **Consequence:** Near-real-time UX with zero new infrastructure; polling pauses when the tab is hidden to save hosting hits.
+
+### ADR-04: htdocs Shim for Shared Hosting Without DocumentRoot Control
+* **Context:** Shared hosting points the web root at `htdocs/` and forbids changes, while the app entry lives in `public/`.
+* **Decision:** A root `.htaccess` shim forwards all requests into `public/`, blocks direct access to code/config/`.env`, and prevents rewrite loops via `REDIRECT_STATUS` guard.
+* **Consequence:** Identical codebase runs locally and on hosting; verified against real Apache 2.4 + mod_php.
+
+## 7. HTTP Route Table
+
+| Method | Path | Guard | Handler |
+|---|---|---|---|
+| GET | `/` | - | `ReportController::home()` |
+| GET/POST | `/login`, `/register` | - | `AuthController` |
+| GET | `/logout` | auth | `AuthController::logout()` |
+| GET/POST | `/report/create` | auth | `ReportController::create/store()` |
+| GET | `/report/history` | auth | `ReportController::history()` |
+| GET | `/api/notifications` | auth | `NotificationController::userUpdates()` (JSON) |
+| GET | `/admin` | auth+admin | `AdminController::dashboard()` |
+| GET/POST | `/admin/report/detail?id=` | auth+admin | `AdminController::showDetail/updateStatus()` |
+| GET | `/admin/repeat-offenders` | auth+admin | `AdminController::repeatOffenders()` |
+| POST | `/admin/cleanup-photos` | auth+admin+CSRF | `AdminController::cleanupPhotos()` |
+| GET | `/api/admin/updates` | auth+admin | `NotificationController::adminUpdates()` (JSON) |
+
+## 8. Shared-Hosting Deployment Notes
+
+* Upload everything except `vendor/` (rebuilt via `composer install --no-dev`), `tests/`, and `tailwindcss.exe`; import `schema_hosting.sql` (no `CREATE DATABASE`) via phpMyAdmin; create `.env` from `.env.production.example`.
+* Cron is unavailable on free tiers: use the dashboard cleanup button (FR-009) instead of scheduling `bin/cleanup_photos.php`.
+* All timestamps are WIB-normalized (D-015); no server timezone configuration needed.
