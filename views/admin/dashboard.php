@@ -131,6 +131,6 @@ $allStatuses = isset($allStatuses) && is_array($allStatuses) ? $allStatuses : []
       });
     }
     seen = ids;
-  }, 15000);
+  }, 5000);
 })();
 </script>

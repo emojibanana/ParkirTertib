@@ -51,7 +51,7 @@ window.ParkirTertib = (function () {
     window.setTimeout(function () { el.remove(); }, 9000);
   }
 
-  /* Lonceng lembut: arpeggio C-E-G sine bervolume kecil dengan fade-out. */
+  /* Lonceng tegas tapi merdu: arpeggio C-E-G-C triangle bervolume sedang + fade-out. */
   function beep() {
     try {
       var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -59,14 +59,14 @@ window.ParkirTertib = (function () {
       var ctx = new Ctx();
       if (ctx.state === 'suspended') ctx.resume();
       var master = ctx.createGain();
-      master.gain.value = 0.16;
+      master.gain.value = 0.3;
       master.connect(ctx.destination);
-      var notes = [523.25, 659.25, 783.99];
+      var notes = [523.25, 659.25, 783.99, 1046.5];
       notes.forEach(function (freq, i) {
         var osc = ctx.createOscillator();
         var gain = ctx.createGain();
         var t0 = ctx.currentTime + i * 0.13;
-        osc.type = 'sine';
+        osc.type = 'triangle';
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.0001, t0);
         gain.gain.exponentialRampToValueAtTime(1, t0 + 0.04);

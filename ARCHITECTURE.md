@@ -52,8 +52,8 @@ graph TD
 
     MobileUser -->|"HTTP GET/POST"| PublicIndex
     DesktopAdmin -->|"HTTP GET/POST"| PublicIndex
-    MobileUser -->|"Poll /api/notifications (15s)"| PublicIndex
-    DesktopAdmin -->|"Poll /api/admin/updates (15s)"| PublicIndex
+    MobileUser -->|"Poll /api/notifications (5s)"| PublicIndex
+    DesktopAdmin -->|"Poll /api/admin/updates (5s)"| PublicIndex
     PublicIndex --> StaticAssets
     PublicIndex --> Router
     Router --> AuthMiddleware
@@ -200,7 +200,7 @@ The application reads configuration parameters from `.env` loaded into PHP syste
 
 ### ADR-03: Polling Instead of WebSockets for Real-Time Updates
 * **Context:** Users expect live notifications, but shared hosting provides no WebSocket server, background worker, or cron.
-* **Decision:** 15-second JSON polling (`/api/notifications`, `/api/admin/updates`) with client-side snapshot diffing, toast, and beep (D-016).
+* **Decision:** 5-second JSON polling (`/api/notifications`, `/api/admin/updates`) with client-side snapshot diffing, toast, and chime (D-016).
 * **Consequence:** Near-real-time UX with zero new infrastructure; polling pauses when the tab is hidden to save hosting hits.
 
 ### ADR-04: htdocs Shim for Shared Hosting Without DocumentRoot Control

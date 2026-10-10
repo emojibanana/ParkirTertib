@@ -80,6 +80,6 @@ $reports = isset($reports) && is_array($reports) ? $reports : [];
       });
     }
     snapshot = current;
-  }, 15000);
+  }, 5000);
 })();
 </script>
