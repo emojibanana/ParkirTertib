@@ -8,7 +8,13 @@ window.ParkirTertib = (function () {
       box = document.createElement('div');
       box.id = 'toast-container';
       box.className = 'fixed top-4 left-1/2 z-50 w-full max-w-md px-4 space-y-2';
+      /* Posisi kritis ditulis inline agar tetap benar walau CSS build basi. */
+      box.style.position = 'fixed';
+      box.style.top = '16px';
+      box.style.left = '50%';
       box.style.transform = 'translateX(-50%)';
+      box.style.width = 'min(28rem, calc(100vw - 2rem))';
+      box.style.zIndex = '50';
       document.body.appendChild(box);
     }
     return box;
