@@ -115,6 +115,18 @@ if ($uri === '/admin' && $method === 'GET') {
     exit;
 }
 
+if ($uri === '/admin/cleanup-photos' && $method === 'POST') {
+    AuthMiddleware::handle();
+    AdminMiddleware::handle();
+    $admin = new AdminController(createPDOConnection());
+    /** @var array<string, string> $post */
+    $post = $_POST;
+    $uploadDir = dirname(__DIR__) . '/' . env('UPLOAD_DIR', 'public/uploads');
+    $result = $admin->cleanupPhotos($post, $uploadDir);
+    header('Location: ' . (string) ($result['redirect'] ?? '/admin'));
+    exit;
+}
+
 if ($uri === '/admin/repeat-offenders' && $method === 'GET') {
     AuthMiddleware::handle();
     AdminMiddleware::handle();

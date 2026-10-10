@@ -4,25 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use App\Controllers\AdminController;
+use App\Helpers\CSRF;
+use App\Helpers\PhotoCleaner;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-use function cleanupResolvedPhotos;
-
 /**
- * Unit test skrip cleanup foto (FR-007).
+ * Unit test cleanup foto (FR-007): helper + aksi dashboard Satpam.
  * Berjalan di atas skema uji terisolasi dengan transaksi rollback.
  */
 class CleanupPhotosTest extends TestCase
 {
     private PDO $pdo;
     private string $uploadDir = '';
-
-    public static function setUpBeforeClass(): void
-    {
-        require_once dirname(__DIR__, 2) . '/bin/cleanup_photos.php';
-        parent::setUpBeforeClass();
-    }
 
     protected function setUp(): void
     {
@@ -108,7 +103,7 @@ class CleanupPhotosTest extends TestCase
         $oldActive = $this->seedReport('Menunggu', 'aktif.png', 30);
         $oldDoneMissing = $this->seedReport('Selesai', 'tak-ada.png', 10);
 
-        $stats = cleanupResolvedPhotos($this->pdo, $this->uploadDir);
+        $stats = PhotoCleaner::run($this->pdo, $this->uploadDir);
 
         $this->assertSame(2, $stats['checked']);
         $this->assertSame(1, $stats['deleted']);
@@ -125,5 +120,38 @@ class CleanupPhotosTest extends TestCase
         $this->assertSame('aktif.png', $this->findReport($oldActive)['photo']);
 
         $this->assertNull($this->findReport($oldDoneMissing)['photo']);
+    }
+
+    public function testAdminCleanupActionDeletesAndFlashesSummary(): void
+    {
+        $_SESSION = [];
+        file_put_contents($this->uploadDir . '/tua2.png', 'lama');
+        $id = $this->seedReport('Selesai', 'tua2.png', 9);
+
+        $admin = new AdminController($this->pdo);
+        $result = $admin->cleanupPhotos(
+            [CSRF::FIELD_NAME => CSRF::generateToken()],
+            $this->uploadDir
+        );
+
+        $this->assertTrue($result['ok']);
+        $this->assertSame('/admin', $result['redirect']);
+        $this->assertFileDoesNotExist($this->uploadDir . '/tua2.png');
+        $this->assertNull($this->findReport($id)['photo']);
+        $this->assertStringContainsString(
+            '1 file dihapus',
+            (string) ($_SESSION['flash']['message'] ?? '')
+        );
+    }
+
+    public function testAdminCleanupActionRejectsInvalidCsrf(): void
+    {
+        $_SESSION = [];
+
+        $admin = new AdminController($this->pdo);
+        $result = $admin->cleanupPhotos([CSRF::FIELD_NAME => 'palsu'], $this->uploadDir);
+
+        $this->assertFalse($result['ok']);
+        $this->assertSame('/admin', $result['redirect']);
     }
 }

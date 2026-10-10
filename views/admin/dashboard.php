@@ -1,5 +1,6 @@
 <?php
 // Dashboard Satpam (desktop). Variabel: $counts, $reports, $search, $status, $allStatuses.
+use App\Helpers\CSRF;
 use App\Helpers\Sanitizer;
 
 $counts = isset($counts) && is_array($counts) ? $counts : [];
@@ -39,6 +40,14 @@ $allStatuses = isset($allStatuses) && is_array($allStatuses) ? $allStatuses : []
                 <p class="text-2xl font-bold text-slate-900"><?= (int) ($counts['selesai'] ?? 0) ?></p>
             </div>
         </div>
+
+        <form method="post" action="/admin/cleanup-photos" class="mt-4 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center"
+            onsubmit="return confirm('Hapus foto laporan Selesai yang berumur lebih dari 7 hari?');">
+            <?= CSRF::field() ?>
+            <p class="flex-1 text-sm text-slate-600">Foto laporan <strong>Selesai &gt; 7 hari</strong> menghabiskan disk. Metadata teks tetap tersimpan.</p>
+            <button type="submit"
+                class="inline-flex items-center justify-center px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm rounded-lg shadow-sm transition-all cursor-pointer">Bersihkan Foto Lama</button>
+        </form>
 
         <form method="get" action="/admin" class="mt-4 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row">
             <input name="search" type="text" value="<?= Sanitizer::escape($search) ?>" placeholder="Cari pelat / lokasi…"

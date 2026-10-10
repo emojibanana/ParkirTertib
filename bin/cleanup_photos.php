@@ -16,51 +16,14 @@ if (php_sapi_name() !== 'cli') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-/**
- * @return array{checked: int, deleted: int, missing: int, failed: int}
- */
-function cleanupResolvedPhotos(PDO $pdo, string $uploadDir): array
-{
-    $stmt = $pdo->prepare(
-        'SELECT `id`, `photo` FROM `report`'
-        . " WHERE `status` = 'Selesai' AND `updated_at` < (NOW() - INTERVAL 7 DAY)"
-        . ' AND `photo` IS NOT NULL'
-    );
-    $stmt->execute();
-
-    /** @var array<int, array<string, mixed>> $rows */
-    $rows = $stmt->fetchAll();
-
-    $stats = ['checked' => 0, 'deleted' => 0, 'missing' => 0, 'failed' => 0];
-    $clear = $pdo->prepare('UPDATE `report` SET `photo` = NULL WHERE `id` = :id');
-
-    foreach ($rows as $row) {
-        $stats['checked']++;
-        $photo = (string) ($row['photo'] ?? '');
-        $path = rtrim($uploadDir, '/\\') . DIRECTORY_SEPARATOR . $photo;
-
-        if (!is_file($path)) {
-            $stats['missing']++;
-        } elseif (!@unlink($path)) {
-            $stats['failed']++;
-            fwrite(STDERR, 'Gagal menghapus: ' . $path . "\n");
-            continue;
-        } else {
-            $stats['deleted']++;
-        }
-
-        $clear->bindValue(':id', (int) ($row['id'] ?? 0), PDO::PARAM_INT);
-        $clear->execute();
-    }
-
-    return $stats;
-}
+use App\Helpers\PhotoCleaner;
 
 if (basename((string) ($_SERVER['argv'][0] ?? '')) === basename(__FILE__)) {
     $pdo = createPDOConnection();
     $uploadDir = dirname(__DIR__) . '/' . env('UPLOAD_DIR', 'public/uploads');
-    $stats = cleanupResolvedPhotos($pdo, $uploadDir);
+    $stats = PhotoCleaner::run($pdo, $uploadDir);
     fwrite(STDOUT, sprintf(
         "Cleanup selesai: %d diperiksa, %d file dihapus, %d sudah hilang, %d gagal.\n",
         $stats['checked'],

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Helpers\CSRF;
+use App\Helpers\PhotoCleaner;
 use App\Helpers\View;
 use App\Models\ReportLogModel;
 use App\Models\ReportModel;
@@ -182,6 +183,35 @@ class AdminController
             . View::render('layouts/footer.php');
 
         return ['found' => true, 'html' => $html];
+    }
+
+    /**
+     * Pembersihan foto manual dari dashboard (pengganti cron di hosting tanpa CLI).
+     *
+     * @param array<string, string> $input
+     * @return array<string, mixed>
+     */
+    public function cleanupPhotos(array $input, string $uploadDir): array
+    {
+        if (!CSRF::verifyToken($this->stringOrNull($input, CSRF::FIELD_NAME))) {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Token keamanan tidak valid.'];
+
+            return ['ok' => false, 'redirect' => '/admin'];
+        }
+
+        $stats = PhotoCleaner::run($this->pdo, $uploadDir);
+        $_SESSION['flash'] = [
+            'type' => 'success',
+            'message' => sprintf(
+                'Cleanup selesai: %d diperiksa, %d file dihapus, %d sudah hilang, %d gagal.',
+                $stats['checked'],
+                $stats['deleted'],
+                $stats['missing'],
+                $stats['failed']
+            ),
+        ];
+
+        return ['ok' => true, 'redirect' => '/admin'];
     }
 
     /**

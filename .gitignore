@@ -7,6 +7,10 @@ vendor/
 # Build tool binary (unduh: tailwindcss v3.4.17 windows-x64 dari GitHub releases)
 tailwindcss.exe
 
+# Uploaded report photos (user data; keep .htaccess protection tracked)
+public/uploads/*
+!public/uploads/.htaccess
+
 # Test artifacts
 tests/tmp/
 coverage/
