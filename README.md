@@ -12,6 +12,8 @@ Mahasiswa melapor via HP dengan foto bukti, Satpam menindaklanjuti via dashboard
 | Satpam (admin) | `satpam@unimed.ac.id` | `************` |
 | Mahasiswa (user) | `email user` | `password user` |
 
+**Catatan:** Kontak email saya ahmadbanna1709@gmail.com untuk mencoba peran Satpam.
+
 Alur coba: daftar akun baru → buat laporan + foto → login satpam → ubah status
 (`Menunggu` → `Diproses` → `Ditindaklanjuti` → `Selesai`) → cek halaman pelanggar berulang.
 
