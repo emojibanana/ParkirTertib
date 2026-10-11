@@ -9,8 +9,8 @@ Mahasiswa melapor via HP dengan foto bukti, Satpam menindaklanjuti via dashboard
 
 | Peran | Email | Password |
 |---|---|---|
-| Satpam (admin) | `satpam@unimed.ac.id` | `Password123!` |
-| Mahasiswa (user) | `ahmad@mhs.unimed.ac.id` | `Password123!` |
+| Satpam (admin) | `satpam@unimed.ac.id` | `************` |
+| Mahasiswa (user) | `email user` | `password user` |
 
 Alur coba: daftar akun baru → buat laporan + foto → login satpam → ubah status
 (`Menunggu` → `Diproses` → `Ditindaklanjuti` → `Selesai`) → cek halaman pelanggar berulang.
